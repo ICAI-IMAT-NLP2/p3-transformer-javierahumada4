@@ -40,9 +40,9 @@ class Transformer(nn.Module):
                 dec_intermediate_size: int, num_enc_hidden_layers: int, num_dec_hidden_layers: int
                 ):
         super(Transformer, self).__init__()
-        self.encoder = None
-        self.decoder = None
-        self.output_linear = None
+        self.encoder = TransformerEncoder(src_vocab_size, max_enc_position_embeddings, enc_d_model, num_attention_heads, enc_intermediate_size, num_enc_hidden_layers)
+        self.decoder = TransformerDecoder(tgt_vocab_size, max_dec_position_embeddings, dec_d_model, num_attention_heads, dec_intermediate_size, num_dec_hidden_layers)
+        self.output_linear = nn.Linear(dec_d_model, tgt_vocab_size, bias=False)
 
     def forward(self, src_input: torch.Tensor, tgt_input: torch.Tensor, attn_mask: torch.Tensor = None) -> torch.Tensor:
         """Forward pass through the Transformer model.
@@ -56,13 +56,13 @@ class Transformer(nn.Module):
             torch.Tensor: Output tensor of shape (batch_size, tgt_seq_len, tgt_vocab_size).
         """
         # Pass the source input through the encoder
-        enc_output = None
+        enc_output = self.encoder(src_input, attn_mask)
 
         # Pass the target input through the decoder, with the encoder output
-        dec_output = None
+        dec_output = self.decoder(tgt_input, enc_output)
 
         # Project the decoder output to the target vocabulary size
-        dec_output = None
+        dec_output = self.output_linear(dec_output) 
 
         return dec_output
     
