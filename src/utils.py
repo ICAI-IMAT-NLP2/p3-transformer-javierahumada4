@@ -53,7 +53,7 @@ class AttentionHead(nn.Module):
 
         if mask is not None:
             # Apply the causal mask by setting the masked positions to a very large negative value.
-            scores = scores.masked_fill(mask, float('-inf'))
+            scores = scores.masked_fill(mask == 0, float('-inf'))
 
         # Apply the softmax function to obtain the attention weights.
         weights = F.softmax(scores, dim=2)
